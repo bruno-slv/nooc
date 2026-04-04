@@ -96,4 +96,4 @@ cmake --install . /usr/local
 
 ## Limitations
 
-Currently, the lib doesn't support multi inheritance, encapsulation and is very manual when handling memory. Object are always defined in the heap, without the possibility of creating objects on the stack in the current architecture.
+Currently, the lib doesn't support multi inheritance, encapsulation and is very manual when handling memory. Objects are always defined in the heap, without the possibility of creating objects on the stack in the current architecture.
