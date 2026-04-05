@@ -82,6 +82,21 @@ CALL(obj, ExampleClass, example_method)
 CALL(obj, ExampleClass, destructor)
 ```
 
+It's also possible to use objects allocated on stack with:
+
+```C
+// Construc Object
+ExampleClass *obj = CONSTRUCTOR_STACK(
+    ExampleClass,
+    .example_attribute = 1
+);
+
+// Run method
+CALL(&obj, ExampleClass, example_method)
+```
+
+While using stack objects, the destructor should not be called.
+
 ## Installation
 
 CMake minimum 3.10 version is required.
@@ -96,4 +111,4 @@ cmake --install . /usr/local
 
 ## Limitations
 
-Currently, the lib doesn't support multi inheritance, encapsulation and is very manual when handling memory. Objects are always defined in the heap, without the possibility of creating objects on the stack in the current architecture.
+Currently, the lib doesn't support multi inheritance, encapsulation and is very manual when handling memory with dynamic allocated objects.

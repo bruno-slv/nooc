@@ -21,6 +21,9 @@
 #define APPLY_OWN_ATTRIBUTES_ON_CONSTRUCTOR(type, name) _obj->name = p.name;
 #define APPLY_PARENT_ATTRIBUTES_ON_CONSTRUCTOR(type, name) _obj->_super.name = p.name;
 
+#define APPLY_OWN_ATTRIBUTES_ON_CONSTRUCTOR_STACK(type, name) _obj.name = p.name;
+#define APPLY_PARENT_ATTRIBUTES_ON_CONSTRUCTOR_STACK(type, name) _obj._super.name = p.name;
+
 #define IMPL_METHOD(type, name, method, ...) \
     _##name##_vtable.method = name##_##method;
 
@@ -64,28 +67,46 @@ _GLOBAL_CLASS(Object)
 
 // Constructor
 
-#define DEF_CONSTRUCTOR(name, parent)                                       \
-    name *name##_new(name##ConstructorAttributes p)                         \
-    {                                                                       \
-        static int _vtable_inited = 0;                                      \
-        if (!_vtable_inited)                                                \
-        {                                                                   \
-            _##name##_init_vtable();                                        \
-            _vtable_inited = 1;                                             \
-        }                                                                   \
-                                                                            \
-        name *_obj = (name *)calloc(1, sizeof(name));                       \
-        if (!_obj)                                                          \
-            return NULL;                                                    \
-                                                                            \
-        parent##_init(&_obj->_super);                                        \
-        parent##_ATTRIBUTES(APPLY_PARENT_ATTRIBUTES_ON_CONSTRUCTOR)         \
-            name##_init(_obj);                                              \
-        name##_ATTRIBUTES(APPLY_OWN_ATTRIBUTES_ON_CONSTRUCTOR) return _obj; \
+#define DEF_CONSTRUCTOR(name, parent)                                             \
+    name *name##_new(name##ConstructorAttributes p)                               \
+    {                                                                             \
+        static int _vtable_inited = 0;                                            \
+        if (!_vtable_inited)                                                      \
+        {                                                                         \
+            _##name##_init_vtable();                                              \
+            _vtable_inited = 1;                                                   \
+        }                                                                         \
+                                                                                  \
+        name *_obj = (name *)calloc(1, sizeof(name));                             \
+        if (!_obj)                                                                \
+            return NULL;                                                          \
+                                                                                  \
+        parent##_init(&_obj->_super);                                             \
+        parent##_ATTRIBUTES(APPLY_PARENT_ATTRIBUTES_ON_CONSTRUCTOR)               \
+            name##_init(_obj);                                                    \
+        name##_ATTRIBUTES(APPLY_OWN_ATTRIBUTES_ON_CONSTRUCTOR) return _obj;       \
+    }                                                                             \
+    name name##_new_stack(name##ConstructorAttributes p)                          \
+    {                                                                             \
+        static int _vtable_inited = 0;                                            \
+        if (!_vtable_inited)                                                      \
+        {                                                                         \
+            _##name##_init_vtable();                                              \
+            _vtable_inited = 1;                                                   \
+        }                                                                         \
+                                                                                  \
+        name _obj;                                                                \
+        parent##_init(&_obj._super);                                              \
+        parent##_ATTRIBUTES(APPLY_PARENT_ATTRIBUTES_ON_CONSTRUCTOR_STACK)         \
+            name##_init(&_obj);                                                   \
+        name##_ATTRIBUTES(APPLY_OWN_ATTRIBUTES_ON_CONSTRUCTOR_STACK) return _obj; \
     }
 
 #define CONSTRUCTOR(name, ...) \
     name##_new((name##ConstructorAttributes){__VA_ARGS__});
+
+#define CONSTRUCTOR_STACK(name, ...) \
+    name##_new_stack((name##ConstructorAttributes){__VA_ARGS__});
 
 // Class
 
@@ -111,6 +132,7 @@ _GLOBAL_CLASS(Object)
     name##_METHODS(DECL_METHOD)                                             \
         name *                                                              \
         name##_new(name##ConstructorAttributes p);                          \
+    name name##_new_stack(name##ConstructorAttributes p);                   \
     extern name##VTable _##name##_vtable;
 
 #define VTABLE(name, parent)                              \
