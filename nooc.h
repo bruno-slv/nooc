@@ -42,12 +42,14 @@
     };                                               \
     name##_METHODS(DECL_METHOD) extern name##VTable _##name##_vtable;
 
-#define _GLOBAL_VTABLE(name)            \
-    name##VTable _##name##_vtable;      \
-    static void _##name##_init_vtable() \
-    {                                   \
-        name##_METHODS(IMPL_METHOD)     \
+#define _GLOBAL_VTABLE(name)              \
+    extern name##VTable _##name##_vtable; \
+    static void _##name##_init_vtable()   \
+    {                                     \
+        name##_METHODS(IMPL_METHOD)       \
     }
+
+#define DEF_VTABLE(name) name##VTable _##name##_vtable;
 
 // Root Object
 
@@ -62,6 +64,7 @@
     MEMORY_METHODS(Object, X)
 
 _GLOBAL_CLASS(Object)
+_GLOBAL_VTABLE(Object)
 
 // Inherited Object Definitions
 
@@ -135,12 +138,19 @@ _GLOBAL_CLASS(Object)
     name name##_new_stack(name##ConstructorAttributes p);                   \
     extern name##VTable _##name##_vtable;
 
-#define VTABLE(name, parent)                              \
-    name##VTable _##name##_vtable;                        \
-    static void _##name##_init_vtable()                   \
-    {                                                     \
-        name##_METHODS(IMPL_METHOD)                       \
-            _##name##_vtable._super = _##parent##_vtable; \
+#define VTABLE(name, parent)                          \
+    extern name##VTable _##name##_vtable;             \
+    static void _##name##_init_vtable()               \
+    {                                                 \
+        static int _parent_inited = 0;                \
+        if (!_parent_inited)                          \
+        {                                             \
+            _##parent##_init_vtable();                \
+            _parent_inited = 1;                       \
+        }                                             \
+                                                      \
+        _##name##_vtable._super = _##parent##_vtable; \
+        name##_METHODS(IMPL_METHOD)                   \
     }
 
 #define CALL(obj, type, method, ...) \

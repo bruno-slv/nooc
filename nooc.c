@@ -1,6 +1,6 @@
 #include <nooc.h>
 
-_GLOBAL_VTABLE(Object)
+DEF_VTABLE(Object)
 
 // Every class should implement its own destructor and init
 
