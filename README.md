@@ -85,8 +85,8 @@ CALL(obj, ExampleClass, destructor)
 It's also possible to use objects allocated on stack with:
 
 ```C
-// Construc Object
-ExampleClass *obj = CONSTRUCTOR_STACK(
+// Construct new Object
+ExampleClass obj = CONSTRUCTOR_STACK(
     ExampleClass,
     .example_attribute = 1
 );
